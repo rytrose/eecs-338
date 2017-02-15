@@ -1,0 +1,25 @@
+Script started on Sun 29 Jan 2017 11:24:25 AM STD
+]0;rytrose@DESKTOP-1DDNNTP: /mnt/c/Users/rytro/eecs338rytrose@DESKTOP-1DDNNTP:/mnt/c/Users/rytro/eecs338$ make
+gcc -o as1.o as1.c
+./as1.o
+Fibonacci Numbers:
+Index (0): 1
+Index (1): 1
+Index (2): 2
+Index (3): 3
+Index (4): 5
+Index (5): 8
+Index (6): 13
+Index (7): 21
+Index (8): 34
+Index (9): 55
+Index (10): 89
+Index (11): 144
+Index (12): 233
+Index (13): 377
+Index (14): 610
+rm *.o
+]0;rytrose@DESKTOP-1DDNNTP: /mnt/c/Users/rytro/eecs338rytrose@DESKTOP-1DDNNTP:/mnt/c/Users/rytro/eecs338$ exit
+exit
+
+Script done on Sun 29 Jan 2017 11:24:38 AM STD
