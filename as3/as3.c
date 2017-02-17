@@ -60,6 +60,9 @@ if(c1_pid == 0)
 	// Close c12p READ
 	close(c12p[READ]);
 
+	// c1 buffer
+	char c1buf[10];
+	
 	// c1 message
 	char c1message[2];
 	int i;
@@ -77,8 +80,13 @@ if(c1_pid == 0)
 	}
 	
 	close(c12p[WRITE]);
-
-	return(0);
+	
+	if((read(p2c1[READ], c1buf, 10)) > 0){
+		if(*c1buf == 'k')
+			return(0);
+	}
+	
+	return(1);
 }
 
 // Child 2 (c1)
@@ -96,26 +104,31 @@ if(c2_pid == 0)
 	// c2 buffer
 	char c2buf[10];
 	
-	if((read(p2c2[READ], c2buf, 10)) > 0) {
-
-		// c2 message
-		char c2message[2];
-		int l;
+	while((read(p2c2[READ], c2buf, 10)) > 0) {
 	
-		for(l = 0; l < ITERATIONS; l++){
-			sprintf(c2message, "%i", (rand_lim(3425) % 2));
-			write(c22p[WRITE], c2message, 2);
-			struct timespec tim, tim2;
-			tim.tv_sec = 0;
-			tim.tv_nsec = 20000000L;
-			nanosleep(&tim, &tim2);
+		if(*c2buf == 'k')
+			return(0);
+		else{
+			
+			// c2 message
+			char c2message[2];
+			int l;
 	
+			for(l = 0; l < ITERATIONS; l++){
+				sprintf(c2message, "%i", (rand_lim(3425) % 2));
+				write(c22p[WRITE], c2message, 2);
+				struct timespec tim, tim2;
+				tim.tv_sec = 0;
+				tim.tv_nsec = 20000000L;
+				nanosleep(&tim, &tim2);
+		
+			}
+		
+			close(c22p[WRITE]);
 		}
-	
-		close(c22p[WRITE]);
 	}
-	
-	return(0);
+
+	return(1);
 }
 
 
@@ -130,6 +143,7 @@ close(c22p[WRITE]);
 
 char c1responses[ITERATIONS];
 int c1index = 0;
+
 
 
 // Read the c1 responses
@@ -154,9 +168,13 @@ int c2index = 0;
 while((read(c22p[READ], buf2, 1024)) > 0){
 	c2responses[c2index] = *buf2;
 	c2index++;
+	if(c2index > 9)
+		break;
 }
 
 close(c22p[READ]);
+
+
 
 int j;
 double c1time = 0.0;
@@ -205,6 +223,14 @@ printf("Score:\n");
 printf("%i: %.1f years\n", c1_pid, c1time);
 printf("%i: %.1f years\n", c2_pid, c2time);
 
+// Tell the children to kill themselves
+char p2c1kill[1] = {'k'};
+write(p2c1[WRITE], p2c1kill, 1);
+
+char p2c2kill[1] = {'k'};
+write(p2c2[WRITE], p2c2kill, 1);
+
+sleep(1);
 
 return (0);
 }
