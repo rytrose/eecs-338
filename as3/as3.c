@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
+#include <time.h>
 
 #define READ 0
 #define WRITE 1
@@ -25,22 +27,22 @@ char buf2[1024];
 int p2c1[2], c12p[2], p2c2[2], c22p[2];
 
 // Initialize pipes
-if(pipe(p2c1)){
+if(pipe(p2c1) == -1){
 	perror("Pipe not created: ");
 	return(1);
 }
 	
-if(pipe(c12p)){
+if(pipe(c12p) == -1){
 	perror("Pipe not created: ");
 	return(1);
 }
 
-if(pipe(p2c2)){
+if(pipe(p2c2) == -1){
 	perror("Pipe not created: ");
 	return(1);
 }
 
-if(pipe(c22p)){
+if(pipe(c22p) == -1){
 	perror("Pipe not created: ");
 	return(1);
 }
@@ -66,15 +68,16 @@ if(c1_pid == 0)
 	fflush(stdout);
 
 	for(i = 0; i < ITERATIONS; i++){
-		sprintf(c1message, "%i", rand_lim(1));
+		sprintf(c1message, "%i", (rand_lim(776) % 2) );
 		write(c12p[WRITE], c1message, 2);
 		struct timespec tim, tim2;
 		tim.tv_sec = 0;
-		tim.tv_nsec = 80000000L;
+		tim.tv_nsec = 20000000L;
 		nanosleep(&tim, &tim2);
 	}
-
+	
 	close(c12p[WRITE]);
+
 	return(0);
 }
 
@@ -84,27 +87,34 @@ c2_pid = fork();
 // c2 block
 if(c2_pid == 0)
 {
-
 	// Close p2c2 WRITE
 	close(p2c2[WRITE]);
 
 	// Close c22p READ
 	close(c22p[READ]);
 
-	// c2 message
-	char c2message[2];
-	int i;
+	// c2 buffer
+	char c2buf[10];
+	
+	if((read(p2c2[READ], c2buf, 10)) > 0) {
 
-	for(i = 0; i < ITERATIONS; i++){
-		sprintf(c2message, "%i", rand_lim(1));
-		write(c22p[WRITE], c2message, 2);
-		struct timespec tim, tim2;
-		tim.tv_sec = 0;
-		tim.tv_nsec = 80000000L;
-		nanosleep(&tim, &tim2);
+		// c2 message
+		char c2message[2];
+		int l;
+	
+		for(l = 0; l < ITERATIONS; l++){
+			sprintf(c2message, "%i", (rand_lim(3425) % 2));
+			write(c22p[WRITE], c2message, 2);
+			struct timespec tim, tim2;
+			tim.tv_sec = 0;
+			tim.tv_nsec = 20000000L;
+			nanosleep(&tim, &tim2);
+	
+		}
+	
+		close(c22p[WRITE]);
 	}
-
-	close(c22p[WRITE]);
+	
 	return(0);
 }
 
@@ -121,11 +131,21 @@ close(c22p[WRITE]);
 char c1responses[ITERATIONS];
 int c1index = 0;
 
+
 // Read the c1 responses
 while((read(c12p[READ], buf, 1024)) > 0){
 	c1responses[c1index] = *buf;
 	c1index++;
+	if(c1index > 9)
+		break;
 }
+
+close(c12p[READ]);
+
+// Tell C2 to start writing
+char p2c2message[2];
+sprintf(p2c2message, "%i", rand_lim(1));
+write(p2c2[WRITE], p2c2message, 2);
 
 char c2responses[ITERATIONS];
 int c2index = 0;
@@ -136,24 +156,14 @@ while((read(c22p[READ], buf2, 1024)) > 0){
 	c2index++;
 }
 
+close(c22p[READ]);
+
 int j;
 double c1time = 0.0;
 double c2time = 0.0;
 
-int k1;
-for(k1 = 0; k1 < ITERATIONS; k1++){
-	printf("C1: %c\n", c1responses[k1]);
-	fflush(stdout);
-}
-
-int k;
-for(k = 0; k < ITERATIONS; k++){
-	printf("C2: %c\n", c2responses[k]);
-	fflush(stdout);
-}
-
 for(j = 0; j < ITERATIONS; j++){
-	printf("Game %i:\n", j);
+	printf("Game %i:\n", j+1);
 	fflush(stdout);
 	
 	// Both children defect
@@ -190,6 +200,11 @@ for(j = 0; j < ITERATIONS; j++){
 	}
 }
 
+printf("----------\n");
+printf("Score:\n");
+printf("%i: %.1f years\n", c1_pid, c1time);
+printf("%i: %.1f years\n", c2_pid, c2time);
+
 
 return (0);
 }
@@ -199,6 +214,8 @@ int rand_lim(int n)
 {
 int divisor = RAND_MAX/(n+1);
 int retval;
+time_t t;
+
 
 do{
 retval = rand() / divisor;
