@@ -1,0 +1,44 @@
+Script started on Fri Feb 17 15:39:45 2017
+]0;rtr29@eecslab-2: ~/eecs338/as3rtr29@eecslab-2:~/eecs338/as3$ make
+gcc -o as3.o as3.c
+./as3.o 
+Computing games...
+Game 1:
+19791: Cooperate
+19792: Cooperate
+Game 2:
+19791: Cooperate
+19792: Defect
+Game 3:
+19791: Cooperate
+19792: Cooperate
+Game 4:
+19791: Cooperate
+19792: Defect
+Game 5:
+19791: Cooperate
+19792: Defect
+Game 6:
+19791: Defect
+19792: Cooperate
+Game 7:
+19791: Cooperate
+19792: Cooperate
+Game 8:
+19791: Cooperate
+19792: Defect
+Game 9:
+19791: Defect
+19792: Defect
+Game 10:
+19791: Cooperate
+19792: Defect
+----------
+Score:
+19791: 57.5 years
+19792: 17.5 years
+rm as3.o
+]0;rtr29@eecslab-2: ~/eecs338/as3rtr29@eecslab-2:~/eecs338/as3$ exit
+exit
+
+Script done on Fri Feb 17 15:39:51 2017

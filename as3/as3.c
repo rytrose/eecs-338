@@ -72,7 +72,10 @@ if(c1_pid == 0)
 
 	for(i = 0; i < ITERATIONS; i++){
 		sprintf(c1message, "%i", (rand_lim(776) % 2) );
-		write(c12p[WRITE], c1message, 2);
+		if((write(c12p[WRITE], c1message, 2)) == -1){
+			perror("Write failed: ");
+			return(1);
+		}
 		struct timespec tim, tim2;
 		tim.tv_sec = 0;
 		tim.tv_nsec = 20000000L;
@@ -82,8 +85,10 @@ if(c1_pid == 0)
 	close(c12p[WRITE]);
 	
 	if((read(p2c1[READ], c1buf, 10)) > 0){
-		if(*c1buf == 'k')
+		if(*c1buf == 'k'){
+			close(p2c1[READ]);
 			return(0);
+		}
 	}
 	
 	return(1);
@@ -106,8 +111,10 @@ if(c2_pid == 0)
 	
 	while((read(p2c2[READ], c2buf, 10)) > 0) {
 	
-		if(*c2buf == 'k')
+		if(*c2buf == 'k'){
+			close(p2c2[READ]);
 			return(0);
+		}
 		else{
 			
 			// c2 message
@@ -116,12 +123,14 @@ if(c2_pid == 0)
 	
 			for(l = 0; l < ITERATIONS; l++){
 				sprintf(c2message, "%i", (rand_lim(3425) % 2));
-				write(c22p[WRITE], c2message, 2);
+				if((write(c22p[WRITE], c2message, 2)) == -1){
+					perror("Write failed: ");
+					return(1);
+				}
 				struct timespec tim, tim2;
 				tim.tv_sec = 0;
 				tim.tv_nsec = 20000000L;
 				nanosleep(&tim, &tim2);
-		
 			}
 		
 			close(c22p[WRITE]);
@@ -150,7 +159,7 @@ int c1index = 0;
 while((read(c12p[READ], buf, 1024)) > 0){
 	c1responses[c1index] = *buf;
 	c1index++;
-	if(c1index > 9)
+	if(c1index > (ITERATIONS - 1))
 		break;
 }
 
@@ -168,7 +177,7 @@ int c2index = 0;
 while((read(c22p[READ], buf2, 1024)) > 0){
 	c2responses[c2index] = *buf2;
 	c2index++;
-	if(c2index > 9)
+	if(c2index > (ITERATIONS - 1))
 		break;
 }
 
@@ -225,10 +234,21 @@ printf("%i: %.1f years\n", c2_pid, c2time);
 
 // Tell the children to kill themselves
 char p2c1kill[1] = {'k'};
-write(p2c1[WRITE], p2c1kill, 1);
+if((write(p2c1[WRITE], p2c1kill, 1) == -1)){
+	perror("Write failed: ");
+	return(1);
+}
+
 
 char p2c2kill[1] = {'k'};
-write(p2c2[WRITE], p2c2kill, 1);
+if((write(p2c2[WRITE], p2c2kill, 1 == -1))){
+	perror("Write failed: ");
+	return(1);
+}
+
+// Close pipes
+close(p2c1[WRITE]);
+close(p2c2[WRITE]);
 
 sleep(1);
 

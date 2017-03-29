@@ -1,0 +1,35 @@
+Computing games...
+Game 1:
+19809: Cooperate
+19810: Cooperate
+Game 2:
+19809: Cooperate
+19810: Defect
+Game 3:
+19809: Cooperate
+19810: Cooperate
+Game 4:
+19809: Cooperate
+19810: Defect
+Game 5:
+19809: Cooperate
+19810: Defect
+Game 6:
+19809: Defect
+19810: Cooperate
+Game 7:
+19809: Cooperate
+19810: Cooperate
+Game 8:
+19809: Cooperate
+19810: Defect
+Game 9:
+19809: Defect
+19810: Defect
+Game 10:
+19809: Cooperate
+19810: Defect
+----------
+Score:
+19809: 57.5 years
+19810: 17.5 years
